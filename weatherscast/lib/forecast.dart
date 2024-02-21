@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'location.dart';
 import 'weather.dart';
+import 'dart:convert';
 
 Future<Weather> forecast() async {
   const url = 'https://data.tmd.go.th/nwpapi/v1/forecast/location/hourly/at';
@@ -15,9 +16,22 @@ Future<Weather> forecast() async {
             '$url?lat=${location.latitude}&lon=${location.longitude}&fields=tc,cond'),
         headers: {
           'accept': 'application/json',
-          'authorization': 'Bearer $token',
+          'authorization': 'Bearer $token'
         });
-    return Weather(address: response.body, temperature: 0, cond: 0);
+    if (response.statusCode == 200) {
+      var result = jsonDecode(response.body)["WeatherForecasts"][0]["forecasts"]
+          [0]["data"];
+      Placemark address = (await placemarkFromCoordinates(
+              location.latitude, location.longitude))
+          .first;
+      return Weather(
+        address: '${address.subLocality}\n${address.administrativeArea}',
+        temperature: result['tc'],
+        cond: result['cond'],
+      );
+    } else {
+      return Future.error(response.statusCode);
+    }
   } catch (e) {
     return Future.error(e);
   }
