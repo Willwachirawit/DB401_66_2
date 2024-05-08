@@ -1,19 +1,22 @@
 import 'package:flutter/material.dart';
 
-class Request extends StatefulWidget {
+class Request extends StatelessWidget {
+  final String gameId;
+  final String challenger;
+  final Function onAccept;
+
   const Request(
-      {super.key,
-      required String gameId,
-      required challenger,
-      required void Function(String gameId) onAccept});
+      {required this.gameId,
+      required this.challenger,
+      required this.onAccept,
+      super.key});
 
-  @override
-  State<Request> createState() => _RequestState();
-}
-
-class _RequestState extends State<Request> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return ListTile(
+      title: Text(challenger),
+      trailing: ElevatedButton(
+          onPressed: () => onAccept(gameId), child: const Text('Accept')),
+    );
   }
 }
